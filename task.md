@@ -58,3 +58,5 @@
   - `[x]` Create db.json local database file inside project workspace
   - `[x]` Implement load_db() and save_db() in app.py to serialize dictionary database states to disk
   - `[x]` Add upload deduplication check in app.py to return existing summaries instantly when duplicate file name uploaded
+- `[x]` Dotenv Override Key Upgrades
+  - `[x]` Configure override=True parameters in load_dotenv inside app.py and summarizer.py to instantly hot-reload API key swaps
