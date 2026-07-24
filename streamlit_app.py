@@ -93,6 +93,18 @@ st.markdown("""
         font-weight: 600;
     }
 
+    /* Overall App View Background */
+    .stApp {
+        background-color: #f8fafc !important;
+    }
+
+    /* Sidebar Styling */
+    section[data-testid="stSidebar"] {
+        background-color: rgba(255, 255, 255, 0.75) !important;
+        backdrop-filter: blur(20px) !important;
+        border-right: 1px solid rgba(15, 23, 42, 0.08) !important;
+    }
+
     /* Gradient header styling */
     .app-header {
         background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -112,10 +124,47 @@ st.markdown("""
     .premium-card {
         background: white;
         border: 1px solid rgba(15, 23, 42, 0.06);
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-        margin-bottom: 16px;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02);
+        margin-bottom: 20px;
+    }
+
+    /* Tab Layout override */
+    button[data-baseweb="tab"] {
+        font-family: 'Outfit', sans-serif !important;
+        font-size: 14.5px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        border-bottom: 2px solid transparent !important;
+        padding: 12px 20px !important;
+        transition: all 0.2s ease !important;
+    }
+    button[aria-selected="true"] {
+        color: #4f46e5 !important;
+        border-bottom-color: #4f46e5 !important;
+    }
+
+    /* Buttons override */
+    .stButton>button {
+        background: white !important;
+        color: #475569 !important;
+        border: 1px solid rgba(15, 23, 42, 0.08) !important;
+        border-radius: 12px !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+        padding: 8px 16px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01) !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    .stButton>button:hover {
+        border-color: #4f46e5 !important;
+        color: #4f46e5 !important;
+        background: rgba(79, 70, 229, 0.04) !important;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08) !important;
     }
 
     /* Thinking process card styling */
