@@ -65,15 +65,18 @@ def save_persistent_db():
 # Load DB on startup
 load_persistent_db()
 
-# Configure API Key from Streamlit Secrets or Env
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    # Try Streamlit secrets
-    try:
-        api_key = st.secrets["GEMINI_API_KEY"]
-        os.environ["GEMINI_API_KEY"] = api_key
-    except Exception:
-        pass
+# Configure API Key from Secrets, Env, or Session State
+if "gemini_api_key" not in st.session_state:
+    st.session_state.gemini_api_key = os.getenv("GEMINI_API_KEY")
+    if not st.session_state.gemini_api_key:
+        try:
+            st.session_state.gemini_api_key = st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            pass
+
+# Keep environment variable in sync
+if st.session_state.gemini_api_key:
+    os.environ["GEMINI_API_KEY"] = st.session_state.gemini_api_key
 
 # Custom styling for premium aesthetic
 st.markdown("""
@@ -178,13 +181,21 @@ with st.sidebar:
     st.markdown('<p class="app-subtitle">AI-POWERED ACADEMIC COPILOT</p>', unsafe_allow_html=True)
     st.write("---")
 
-    # API Key warning if missing
-    if not api_key:
+    # API Key configuration
+    if not st.session_state.gemini_api_key:
         st.warning("⚠️ Gemini API key is missing. Paste it below to start:")
         user_key = st.text_input("Enter API Key", type="password")
         if user_key:
+            st.session_state.gemini_api_key = user_key
             os.environ["GEMINI_API_KEY"] = user_key
-            api_key = user_key
+            st.rerun()
+        st.write("---")
+    else:
+        # Show key status inside sidebar
+        st.success("🔑 API Key configured!")
+        if st.button("Change API Key"):
+            st.session_state.gemini_api_key = None
+            os.environ["GEMINI_API_KEY"] = ""
             st.rerun()
         st.write("---")
 

@@ -66,3 +66,4 @@
   - `[x]` Add Mermaid iframe rendering and MathJax delimiter parser in streamlit_app.py
   - `[x]` Add streamlit dependency inside requirements.txt
   - `[x]` Update deprecated st.experimental_rerun() calls to new st.rerun() API inside streamlit_app.py to fix AttributeError crashes
+  - `[x]` Configure st.session_state.gemini_api_key in streamlit_app.py to persistently cache user keys across reruns and prevent invalid API key failures
