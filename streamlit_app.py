@@ -312,11 +312,18 @@ with st.sidebar:
             st.rerun()
         st.write("---")
 
-    # New General Chat button (Pill styled)
-    if st.sidebar.button("➕ New General Chat", key="new_general_chat", use_container_width=True):
-        st.session_state.mode = "general"
-        st.session_state.active_general_chat_id = None
-        st.rerun()
+    # Sidebar Navigation Buttons
+    col_nav1, col_nav2 = st.columns(2)
+    with col_nav1:
+        if st.button("📄 New Paper", key="btn_upload_nav", use_container_width=True):
+            st.session_state.mode = "welcome"
+            st.session_state.active_paper_id = None
+            st.rerun()
+    with col_nav2:
+        if st.button("💬 General Chat", key="btn_chat_nav", use_container_width=True):
+            st.session_state.mode = "general"
+            st.session_state.active_general_chat_id = None
+            st.rerun()
 
     # Recent Documents List (Staged like document cards)
     if st.session_state.papers:
@@ -385,51 +392,58 @@ with col_center:
         # Drag & drop PDF uploader
         uploaded_file = st.file_uploader("Drag & drop your PDF here", type=["pdf"], key="main_pdf_uploader")
         if uploaded_file is not None:
-            # Check if already processed
-            existing_id = None
-            for pid, pdata in st.session_state.papers.items():
-                if pdata.get("metadata", {}).get("file_name") == uploaded_file.name:
-                    existing_id = pid
-                    break
-                    
-            if existing_id:
-                st.session_state.active_paper_id = existing_id
-                st.session_state.mode = "paper"
-                st.success("Loaded from cache!")
-                st.rerun()
-            else:
-                with st.spinner("Processing PDF and generating executive summary..."):
-                    temp_id = str(uuid.uuid4())
-                    file_path = os.path.join(UPLOAD_DIR, f"{temp_id}.pdf")
-                    with open(file_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    
-                    extraction = pdf_reader.extract_pdf_data(file_path)
-                    if extraction["success"]:
-                        exec_summary = summarizer.generate_summary(extraction["text"], "executive")
-                        st.session_state.papers[temp_id] = {
-                            "text": extraction["text"],
-                            "pages": extraction["pages"],
-                            "metadata": {
-                                "title": extraction["metadata"]["title"] or uploaded_file.name,
-                                "file_name": uploaded_file.name,
-                                "author": extraction["metadata"]["author"] or "Unknown Author",
-                                "subject": extraction["metadata"]["subject"] or "Academic Research",
-                                "pages_count": extraction["pages"]
-                            },
-                            "summaries": {
-                                "executive": exec_summary,
-                                "structured": None,
-                                "concepts": None
-                            },
-                            "chat_history": []
-                        }
-                        save_persistent_db()
-                        st.session_state.active_paper_id = temp_id
-                        st.session_state.mode = "paper"
-                        st.rerun()
-                    else:
-                        st.error(f"Failed to read PDF: {extraction['error']}")
+            # Check if this is a newly uploaded file
+            if st.session_state.get("last_processed_file") != uploaded_file.name:
+                # Check if already processed
+                existing_id = None
+                for pid, pdata in st.session_state.papers.items():
+                    if pdata.get("metadata", {}).get("file_name") == uploaded_file.name:
+                        existing_id = pid
+                        break
+                        
+                if existing_id:
+                    st.session_state.active_paper_id = existing_id
+                    st.session_state.mode = "paper"
+                    st.session_state.last_processed_file = uploaded_file.name
+                    st.success("Loaded from cache!")
+                    st.rerun()
+                else:
+                    with st.spinner("Processing PDF and generating executive summary..."):
+                        temp_id = str(uuid.uuid4())
+                        file_path = os.path.join(UPLOAD_DIR, f"{temp_id}.pdf")
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
+                        
+                        extraction = pdf_reader.extract_pdf_data(file_path)
+                        if extraction["success"]:
+                            exec_summary = summarizer.generate_summary(extraction["text"], "executive")
+                            st.session_state.papers[temp_id] = {
+                                "text": extraction["text"],
+                                "pages": extraction["pages"],
+                                "metadata": {
+                                    "title": extraction["metadata"]["title"] or uploaded_file.name,
+                                    "file_name": uploaded_file.name,
+                                    "author": extraction["metadata"]["author"] or "Unknown Author",
+                                    "subject": extraction["metadata"]["subject"] or "Academic Research",
+                                    "pages_count": extraction["pages"]
+                                },
+                                "summaries": {
+                                    "executive": exec_summary,
+                                    "structured": None,
+                                    "concepts": None
+                                },
+                                "chat_history": []
+                            }
+                            save_persistent_db()
+                            st.session_state.active_paper_id = temp_id
+                            st.session_state.mode = "paper"
+                            st.session_state.last_processed_file = uploaded_file.name
+                            st.rerun()
+                        else:
+                            st.error(f"Failed to read PDF: {extraction['error']}")
+        else:
+            # Clear last processed file state if uploader is cleared
+            st.session_state.last_processed_file = None
 
         st.write("---")
 

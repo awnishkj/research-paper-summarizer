@@ -67,3 +67,5 @@
   - `[x]` Add streamlit dependency inside requirements.txt
   - `[x]` Update deprecated st.experimental_rerun() calls to new st.rerun() API inside streamlit_app.py to fix AttributeError crashes
   - `[x]` Configure st.session_state.gemini_api_key in streamlit_app.py to persistently cache user keys across reruns and prevent invalid API key failures
+  - `[x]` Build split navigation buttons (New Paper, General Chat) in streamlit_app.py sidebar for state resets
+  - `[x]` Add last_processed_file check inside streamlit_app.py file uploader to prevent sticky reload locks
