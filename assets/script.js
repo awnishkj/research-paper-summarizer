@@ -97,7 +97,6 @@ function renderMarkdownWithMermaid(targetElement, markdownText) {
             renderMathInElement(targetElement, {
                 delimiters: [
                     {left: '$$', right: '$$', display: true},
-                    {left: '$', right: '$', display: false},
                     {left: '\\(', right: '\\)', display: false},
                     {left: '\\[', right: '\\]', display: true}
                 ],

@@ -49,3 +49,5 @@
 - `[x]` LaTeX Mathematical Equations Rendering
   - `[x]` Integrate KaTeX CSS and Script CDN libraries inside index.html
   - `[x]` Call renderMathInElement inside script.js rendering pipeline to parse and display formula structures
+  - `[x]` Disable single dollar sign ($) math delimiter in script.js to prevent page-erasure bugs from unclosed text symbols
+  - `[x]` Instruct Gemini to format inline math using \\( and \\) in prompts.py
