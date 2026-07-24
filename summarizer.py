@@ -1,4 +1,5 @@
 import os
+import time
 import google.generativeai as genai
 from dotenv import load_dotenv
 from prompts import (
@@ -28,6 +29,24 @@ def get_gemini_model(model_name="gemini-3.5-flash", system_instruction=None):
         model_name=model_name,
         system_instruction=system_instruction
     )
+
+def call_gemini_with_retry(model_call_fn, max_retries=3, initial_delay=1.5):
+    """
+    Helper function to call a Gemini model function with exponential backoff retries for 429 Rate Limits.
+    """
+    delay = initial_delay
+    for attempt in range(max_retries):
+        try:
+            return model_call_fn()
+        except Exception as e:
+            err_msg = str(e)
+            # Check if it is a rate limit error (429)
+            if "429" in err_msg or "ResourceExhausted" in err_msg or "quota" in err_msg.lower():
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+                    delay *= 2  # Exponential backoff
+                    continue
+            raise e
 
 def generate_summary(paper_text: str, summary_type: str = "executive") -> str:
     """
@@ -71,14 +90,17 @@ REMINDER:
 Generate a thorough, complete response matching the structure requested in the TASK. Make sure you extract actual numerical values, formulas, and dataset details from the text.
 """
         
-        response = model.generate_content(
-            contents=user_message,
-            generation_config={
-                "temperature": 0.25,
-                "top_p": 0.95,
-                "max_output_tokens": 8192,
-            }
-        )
+        def make_call():
+            return model.generate_content(
+                contents=user_message,
+                generation_config={
+                    "temperature": 0.25,
+                    "top_p": 0.95,
+                    "max_output_tokens": 8192,
+                }
+            )
+            
+        response = call_gemini_with_retry(make_call)
         
         return response.text
         
@@ -118,14 +140,18 @@ def chat_with_paper(chat_history: list, paper_text: str) -> str:
         
         # Send the latest user message
         latest_message = chat_history[-1]["content"]
-        response = chat.send_message(
-            latest_message,
-            generation_config={
-                "temperature": 0.3,
-                "top_p": 0.95,
-                "max_output_tokens": 1500,
-            }
-        )
+        
+        def make_call():
+            return chat.send_message(
+                latest_message,
+                generation_config={
+                    "temperature": 0.3,
+                    "top_p": 0.95,
+                    "max_output_tokens": 1500,
+                }
+            )
+            
+        response = call_gemini_with_retry(make_call)
         
         return response.text
         
@@ -150,14 +176,17 @@ def chat_general(chat_history: list) -> str:
             
         chat = model.start_chat(history=gemini_history)
         latest_message = chat_history[-1]["content"]
-        response = chat.send_message(
-            latest_message,
-            generation_config={
-                "temperature": 0.5,
-                "top_p": 0.95,
-                "max_output_tokens": 1500,
-            }
-        )
+        def make_call():
+            return chat.send_message(
+                latest_message,
+                generation_config={
+                    "temperature": 0.5,
+                    "top_p": 0.95,
+                    "max_output_tokens": 1500,
+                }
+            )
+            
+        response = call_gemini_with_retry(make_call)
         
         return response.text
         

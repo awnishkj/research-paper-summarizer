@@ -51,3 +51,6 @@
   - `[x]` Call renderMathInElement inside script.js rendering pipeline to parse and display formula structures
   - `[x]` Disable single dollar sign ($) math delimiter in script.js to prevent page-erasure bugs from unclosed text symbols
   - `[x]` Instruct Gemini to format inline math using \\( and \\) in prompts.py
+- `[x]` Backend API 429 Rate Limit Resiliency
+  - `[x]` Create call_gemini_with_retry helper function with exponential backoff retries in summarizer.py
+  - `[x]` Wrap all summary and chat API calls inside the backoff retry function to handle transient RPM limits
