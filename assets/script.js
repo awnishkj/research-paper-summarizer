@@ -90,6 +90,23 @@ function renderMarkdownWithMermaid(targetElement, markdownText) {
             console.error("Failed to run Mermaid rendering initialization:", e);
         }
     }
+
+    // Render LaTeX Math Equations using KaTeX
+    if (typeof renderMathInElement !== 'undefined') {
+        try {
+            renderMathInElement(targetElement, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false
+            });
+        } catch (e) {
+            console.error("Failed to run KaTeX auto-render:", e);
+        }
+    }
 }
 
 // DOM Elements

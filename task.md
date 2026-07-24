@@ -46,3 +46,6 @@
   - `[x]` Append custom styled CSS wrapper rules for .mermaid graphs in styles.css
   - `[x]` Add self-healing async rendering and error fallbacks inside script.js
   - `[x]` Commands model to wrap labels in quotes to avoid syntax errors inside prompts.py
+- `[x]` LaTeX Mathematical Equations Rendering
+  - `[x]` Integrate KaTeX CSS and Script CDN libraries inside index.html
+  - `[x]` Call renderMathInElement inside script.js rendering pipeline to parse and display formula structures
