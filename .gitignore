@@ -1,0 +1,24 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Environment Configuration (Contains sensitive API Keys!)
+.env
+
+# Session Data
+uploads/*
+!uploads/.gitkeep
+
+# Python cache & bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

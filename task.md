@@ -1,0 +1,40 @@
+- `[x]` Frontend Redesign (3-Column Revert)
+  - `[x]` Reconstruct index.html for 3-column structure
+  - `[x]` Build clean premium light stylesheet in styles.css
+  - `[x]` Revert conversational controller logic in script.js
+- `[x]` General Assistant Routing Bug Fix
+  - `[x]` Swap route evaluation order in app.py to evaluate /api/chat/general first
+  - `[x]` Restart backend server and verify general assistant chat responses
+- `[x]` Full-Screen Chat Focus Layout
+  - `[x]` Implement hidden class toggling on message submit in script.js
+  - `[x]` Declare flex growth and transparent styling for chat-focused container inside styles.css
+  - `[x]` Verify full-screen expansion and reset behaviors
+- `[x]` Chat History Preserved
+  - `[x]` Add general_chat_db and chat_history attributes to app.py models
+  - `[x]` Declare get_general_chat route in app.py
+  - `[x]` Build loadWelcomeChat() and document history recovery into script.js loadPaper()
+  - `[x]` Verify switching and page reloads maintain histories
+- `[x]` Clean Startup State (No Caching)
+  - `[x]` Remove localStorage caching of active document
+  - `[x]` Make page loads always default to a clean welcome screen
+- `[x]` General Chat History Sidebar (ChatGPT Style)
+  - `[x]` Add Recent Chats card and New General Chat button to index.html sidebar
+  - `[x]` Declare multi-session general_chats_db dictionary and endpoints in app.py
+  - `[x]` Integrate updateChatHistoryList() and loadGeneralChatSession() in script.js
+  - `[x]` Verify session switching and list updates on query submit
+- `[x]` Layout Scroll & Visibility Fixes
+  - `[x]` Enable overflow scrollbar on sidebar in styles.css
+  - `[x]` Restrict document and chat history lists to max-height 140px
+  - `[x]` Compact sidebar spacing for perfect viewport fits
+- `[x]` Summary Error Healing
+  - `[x]` Raise exception in app.py upload_pdf if generation returns error string
+  - `[x]` Bypass cached error strings in app.py get_summary
+  - `[x]` Bypass cached error strings in script.js switchTab
+- `[x]` Chain-of-Thought Thinking upgrade
+  - `[x]` Instruct Gemini to perform step-by-step reasoning check inside prompts.py
+  - `[x]` Format reasoning blocks in collapsible details tags
+  - `[x]` Bind GENERAL_CHAT_SYSTEM_PROMPT in summarizer.py
+  - `[x]` Style details/summary blocks premium-ly in styles.css
+- `[x]` Absolute Env Loading Fix
+  - `[x]` Load `.env` using script absolute path in app.py
+  - `[x]` Load `.env` using script absolute path in summarizer.py

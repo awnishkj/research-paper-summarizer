@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResearchIQ // AI Research Paper Summarizer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked JS for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" href="/assets/styles.css?v=19.0">
+</head>
+<body>
+    <!-- API Alert Banner (Hidden by default, shown if API key is missing) -->
+    <div id="api-warning-banner" class="warning-banner hidden">
+        <div class="banner-content">
+            <i data-lucide="alert-triangle"></i>
+            <span><strong>API Key Missing:</strong> Please configure your <code>GEMINI_API_KEY</code> in the <code>.env</code> file at the root of the project to enable summarization and chat features.</span>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- LEFT SIDEBAR: Controls & Uploads -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="/assets/logo_icon.png" alt="ResearchIQ" class="logo-icon-img">
+                    <h1>ResearchIQ</h1>
+                </div>
+                <div class="app-tagline">AI-Powered Research Assistant</div>
+            </div>
+
+            <!-- Paper Metadata Display -->
+            <div id="paper-metadata-card" class="metadata-card hidden">
+                <div class="section-title">Document Details</div>
+                <div class="metadata-grid">
+                    <div class="metadata-item">
+                        <span class="metadata-label">Title</span>
+                        <span id="meta-title" class="metadata-value">No Document Loaded</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Author</span>
+                        <span id="meta-author" class="metadata-value">-</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Subject</span>
+                        <span id="meta-subject" class="metadata-value">-</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Pages</span>
+                        <span id="meta-pages" class="metadata-value">-</span>
+                    </div>
+                </div>
+                
+                <button id="reset-btn" class="btn btn-secondary btn-full">
+                    <i data-lucide="refresh-cw"></i> Upload New Paper
+                </button>
+            </div>
+
+            <!-- New General Chat Button -->
+            <button id="new-chat-btn" class="btn btn-secondary btn-full" style="margin-bottom: 10px;">
+                <i data-lucide="plus"></i> New General Chat
+            </button>
+
+            <!-- History Section -->
+            <div id="history-card" class="metadata-card hidden">
+                <div class="section-title">Recent Documents</div>
+                <div id="history-list" class="history-list">
+                    <!-- History items will be injected here -->
+                </div>
+            </div>
+
+            <!-- Chat History Section -->
+            <div id="chat-history-card" class="metadata-card">
+                <div class="section-title">Recent Chats</div>
+                <div id="chat-history-list" class="history-list">
+                    <!-- Chat history items will be injected here -->
+                </div>
+            </div>
+
+            <!-- System Status Indicator -->
+            <div class="system-status">
+                <div class="status-item">
+                    <span class="status-label">Gemini API Status:</span>
+                    <span id="api-status-badge" class="status-badge checking">
+                        <span class="status-dot"></span> Checking...
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN DASHBOARD CONTENT: Summarizer & Text Output -->
+        <main class="main-content">
+            <!-- Blank State (Shown before upload) -->
+            <div id="blank-state" class="blank-state">
+                <div class="blank-state-content">
+                    <div class="blank-illustration">
+                        <i data-lucide="file-text" class="glow-icon"></i>
+                    </div>
+                    <p class="blank-description">Upload a PDF research paper to generate automated summaries, extract key concepts, and start chatting with the paper context.</p>
+                    
+                    <!-- Drag and Drop Zone -->
+                    <div id="drop-zone" class="upload-zone">
+                        <input type="file" id="file-input" accept=".pdf" class="file-input">
+                        <div class="upload-icon">
+                            <i data-lucide="upload-cloud"></i>
+                        </div>
+                        <p class="upload-main-text">Drag & drop your PDF here</p>
+                        <p class="upload-sub-text">or click to browse files</p>
+                    </div>
+
+                    <!-- General Chat Section -->
+                    <div id="general-chat-card" class="general-chat-card">
+                        <div class="general-chat-header">
+                            <i data-lucide="messages-square"></i>
+                            <span>General AI Research Assistant</span>
+                        </div>
+                        <div id="general-chat-messages" class="general-chat-messages">
+                            <!-- Welcome/Instruction message -->
+                            <div class="message assistant-message">
+                                <div class="message-content">
+                                    <p>👋 Hello! I am your general research helper. You can ask me general questions, clarify scientific terms, or outline study topics before loading a paper.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <form id="general-chat-form" class="general-chat-form">
+                            <textarea 
+                                id="general-chat-input" 
+                                placeholder="Ask a general question..." 
+                                rows="1"
+                            ></textarea>
+                            <button type="submit" id="general-chat-send-btn" class="send-btn">
+                                <i data-lucide="send"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-state hidden">
+                <div class="loading-content">
+                    <div class="spinner-container">
+                        <div class="spinner"></div>
+                        <i data-lucide="sparkles" class="spinner-core-icon"></i>
+                    </div>
+                    <h3 id="loading-title">Parsing Document</h3>
+                    <p id="loading-subtitle">Extracting paper text and generating initial summary. This takes a few seconds...</p>
+                    <div class="progress-bar-container">
+                        <div id="loading-progress" class="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard View (Shown after upload) -->
+            <div id="dashboard-view" class="dashboard-view hidden">
+                <header class="dashboard-header">
+                    <div class="paper-title-area">
+                        <span class="badge">Active Paper</span>
+                        <h2 id="active-paper-title">No Document Loaded</h2>
+                    </div>
+                </header>
+
+                <div class="summary-card glass-panel">
+                    <nav class="summary-tabs">
+                        <button class="tab-btn active" data-tab="executive">
+                            <i data-lucide="zap"></i> TL;DR / Executive
+                        </button>
+                        <button class="tab-btn" data-tab="structured">
+                            <i data-lucide="file-search"></i> Technical Analysis
+                        </button>
+                        <button class="tab-btn" data-tab="concepts">
+                            <i data-lucide="layers"></i> Key Concepts Map
+                        </button>
+                    </nav>
+
+                    <div class="tab-content-container">
+                        <!-- Summary Output -->
+                        <div id="summary-content" class="tab-content markdown-body">
+                            <!-- Summary text will be injected here -->
+                        </div>
+                        
+                        <!-- Tab Loading Skeleton (shown while fetching a different summary) -->
+                        <div id="tab-skeleton" class="skeleton-loader hidden">
+                            <div class="skeleton-line title"></div>
+                            <div class="skeleton-line paragraph"></div>
+                            <div class="skeleton-line paragraph"></div>
+                            <div class="skeleton-line paragraph"></div>
+                            <div class="skeleton-line title" style="width: 60%"></div>
+                            <div class="skeleton-line paragraph"></div>
+                            <div class="skeleton-line paragraph"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR: Chat Assistant -->
+        <section class="chat-panel">
+            <div class="chat-header">
+                <div class="chat-header-title">
+                    <i data-lucide="message-square-code"></i>
+                    <h2>Paper Assistant</h2>
+                </div>
+                <div class="chat-header-subtitle">Grounded in paper context</div>
+            </div>
+
+            <!-- Chat Message List -->
+            <div id="chat-messages" class="chat-messages">
+                <!-- Welcome/Instruction message -->
+                <div class="message system-message">
+                    <div class="message-content">
+                        <p>👋 Hello! I am your research advisor. Upload a research paper, and I can help answer specific questions, explain complex math, locate datasets, or elaborate on their results.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestion chips (shown only when a paper is uploaded) -->
+            <div id="suggestion-container" class="suggestions-wrapper hidden">
+                <div class="suggestion-chip" data-question="What is the core problem addressed in this paper?">
+                    Explain core problem
+                </div>
+                <div class="suggestion-chip" data-question="Explain the methodology and experimental setup in simple terms.">
+                    Methodology in simple terms
+                </div>
+                <div class="suggestion-chip" data-question="What datasets, parameters, or models were used?">
+                    Datasets & parameters
+                </div>
+                <div class="suggestion-chip" data-question="What are the main limitations identified by the authors?">
+                    Critical limitations
+                </div>
+            </div>
+
+            <!-- Chat Input Area -->
+            <div class="chat-input-area">
+                <form id="chat-form" class="chat-input-form">
+                    <textarea 
+                        id="chat-input" 
+                        placeholder="Ask a question about this paper..." 
+                        rows="1"
+                        disabled
+                    ></textarea>
+                    <button type="submit" id="chat-send-btn" class="send-btn" disabled>
+                        <i data-lucide="send"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <!-- Script imports -->
+    <script src="/assets/script.js?v=19.0"></script>
+</body>
+</html>
