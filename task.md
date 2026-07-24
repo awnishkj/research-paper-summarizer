@@ -54,3 +54,7 @@
 - `[x]` Backend API 429 Rate Limit Resiliency
   - `[x]` Create call_gemini_with_retry helper function with exponential backoff retries in summarizer.py
   - `[x]` Wrap all summary and chat API calls inside the backoff retry function to handle transient RPM limits
+- `[x]` Local Persistent DB and Deduplication
+  - `[x]` Create db.json local database file inside project workspace
+  - `[x]` Implement load_db() and save_db() in app.py to serialize dictionary database states to disk
+  - `[x]` Add upload deduplication check in app.py to return existing summaries instantly when duplicate file name uploaded

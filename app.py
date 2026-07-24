@@ -24,8 +24,42 @@ os.makedirs(ASSETS_DIR, exist_ok=True)
 
 app = FastAPI(title="ResearchIQ API", description="Backend services for paper summarization and grounded Q&A.")
 
+import json
+DB_FILE = os.path.join(BASE_DIR, "db.json")
+
 papers_db: Dict[str, Dict[str, Any]] = {}
 general_chats_db: Dict[str, Dict[str, Any]] = {}
+
+def load_db():
+    global papers_db, general_chats_db
+    if os.path.exists(DB_FILE):
+        try:
+            with open(DB_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                papers_db = data.get("papers", {})
+                general_chats_db = data.get("general_chats", {})
+                print(f"Loaded {len(papers_db)} papers and {len(general_chats_db)} chats from db.json")
+        except Exception as e:
+            print("Failed to load db.json, starting empty:", e)
+            papers_db = {}
+            general_chats_db = {}
+    else:
+        papers_db = {}
+        general_chats_db = {}
+
+def save_db():
+    try:
+        with open(DB_FILE, "w", encoding="utf-8") as f:
+            json.dump({
+                "papers": papers_db,
+                "general_chats": general_chats_db
+            }, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print("Failed to save db.json:", e)
+
+@app.on_event("startup")
+async def startup_event():
+    load_db()
 
 class Message(BaseModel):
     role: str  # 'user' or 'assistant'
@@ -45,7 +79,17 @@ async def upload_pdf(file: UploadFile = File(...)):
     """
     if not file.filename.endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
-        
+
+    # Check if a paper with the same file name already exists in the database
+    for pid, pdata in papers_db.items():
+        if pdata.get("metadata", {}).get("file_name") == file.filename:
+            return {
+                "success": True,
+                "paper_id": pid,
+                "metadata": pdata["metadata"],
+                "initial_summary": pdata["summaries"]["executive"]
+            }
+
     paper_id = str(uuid.uuid4())
     file_path = os.path.join(UPLOAD_DIR, f"{paper_id}.pdf")
     
@@ -83,6 +127,8 @@ async def upload_pdf(file: UploadFile = File(...)):
             },
             "chat_history": []
         }
+        
+        save_db()
         
         return {
             "success": True,
@@ -160,6 +206,7 @@ async def get_summary(paper_id: str, summary_type: str):
             raise Exception(summary)
             
         paper_data["summaries"][summary_type] = summary
+        save_db()
         return {"summary": summary}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating {summary_type} summary: {str(e)}")
@@ -214,6 +261,7 @@ async def general_chat_endpoint(payload: GeneralChatPayload):
             "title": title,
             "messages": formatted_messages + [{"role": "assistant", "content": response_text}]
         }
+        save_db()
         
         return {
             "chat_id": chat_id,
@@ -244,6 +292,7 @@ async def chat_endpoint(paper_id: str, payload: ChatPayload):
     try:
         response_text = summarizer.chat_with_paper(formatted_messages, paper_data["text"])
         paper_data["chat_history"] = formatted_messages + [{"role": "assistant", "content": response_text}]
+        save_db()
         return {"response": response_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in chatting with paper: {str(e)}")
