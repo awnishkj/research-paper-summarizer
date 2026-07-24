@@ -904,6 +904,64 @@ async function loadPaper(paperId) {
     }
 }
 
+// API Key Configuration Modal Listeners
+const configureKeyBtn = document.getElementById('configure-key-btn');
+const keyModal = document.getElementById('key-modal');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const cancelKeyBtn = document.getElementById('cancel-key-btn');
+const saveKeyBtn = document.getElementById('save-key-btn');
+const apiKeyInput = document.getElementById('api-key-input');
+
+if (configureKeyBtn && keyModal) {
+    configureKeyBtn.addEventListener('click', () => {
+        keyModal.classList.add('active');
+        apiKeyInput.value = '';
+    });
+    
+    const hideModal = () => {
+        keyModal.classList.remove('active');
+    };
+    
+    closeModalBtn.addEventListener('click', hideModal);
+    cancelKeyBtn.addEventListener('click', hideModal);
+    
+    saveKeyBtn.addEventListener('click', async () => {
+        const newKey = apiKeyInput.value.trim();
+        if (!newKey) {
+            alert("API key cannot be empty.");
+            return;
+        }
+        
+        saveKeyBtn.disabled = true;
+        saveKeyBtn.textContent = "Saving...";
+        
+        try {
+            const response = await fetch('/api/config/key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ api_key: newKey })
+            });
+            
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || "Failed to save key.");
+            
+            alert("API key updated successfully!");
+            hideModal();
+            
+            // Hide alert warning if it was shown
+            apiWarningBanner.classList.add('hidden');
+            apiStatusBadge.className = 'status-badge online';
+            apiStatusBadge.innerHTML = '<span class="status-dot"></span> Online';
+            
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            saveKeyBtn.disabled = false;
+            saveKeyBtn.textContent = "Save Key";
+        }
+    });
+}
+
 // Perform initial history load on startup
 async function initApp() {
     await updateHistoryList();

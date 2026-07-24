@@ -247,6 +247,49 @@ async def chat_endpoint(paper_id: str, payload: ChatPayload):
         return {"response": response_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in chatting with paper: {str(e)}")
+class KeyPayload(BaseModel):
+    api_key: str
+
+@app.post("/api/config/key")
+async def configure_api_key(payload: KeyPayload):
+    """
+    Updates the active Gemini API key in the environment and .env file.
+    """
+    key = payload.api_key.strip()
+    if not key:
+        raise HTTPException(status_code=400, detail="API key cannot be empty.")
+        
+    # Update environment variable in memory
+    os.environ["GEMINI_API_KEY"] = key
+    
+    # Write the updated key back to the .env file so it persists across server restarts
+    env_path = os.path.join(BASE_DIR, ".env")
+    lines = []
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            
+        key_updated = False
+        for i, line in enumerate(lines):
+            if line.startswith("GEMINI_API_KEY="):
+                lines[i] = f"GEMINI_API_KEY={key}\n"
+                key_updated = True
+                break
+        if not key_updated:
+            lines.append(f"GEMINI_API_KEY={key}\n")
+    else:
+        lines = [f"GEMINI_API_KEY={key}\n"]
+        
+    with open(env_path, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+        
+    # Re-configure summarizer SDK with the new key
+    try:
+        summarizer.configure_sdk()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid API key structure: {str(e)}")
+        
+    return {"success": True, "message": "API key successfully updated and saved."}
 
 @app.get("/api/health")
 async def health_check():

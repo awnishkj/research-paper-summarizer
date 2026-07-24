@@ -1173,3 +1173,152 @@ details ul, details ol {
     max-width: 100%;
     height: auto;
 }
+
+/* ==========================================================================
+   API Key Settings and Modal Styling
+   ========================================================================== */
+.settings-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(15, 23, 42, 0.02);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.settings-btn:hover {
+    background: rgba(79, 70, 229, 0.05);
+    border-color: var(--accent-violet);
+    color: var(--accent-violet);
+}
+.settings-btn i {
+    width: 14px;
+    height: 14px;
+}
+
+/* Modal Window styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-normal);
+}
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.modal-content {
+    background: white;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--border-radius-lg);
+    width: 90%;
+    max-width: 450px;
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.9);
+    transition: transform var(--transition-normal);
+}
+.modal.active .modal-content {
+    transform: scale(1);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.modal-header h3 {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-fast);
+}
+.close-modal-btn:hover {
+    color: var(--text-primary);
+}
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.modal-body p {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+.modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.02);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color var(--transition-fast);
+}
+.modal-input:focus {
+    border-color: var(--accent-violet);
+}
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+}
+.modal-btn {
+    padding: 8px 16px;
+    border-radius: var(--border-radius-sm);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition-fast);
+}
+.modal-btn.cancel {
+    background: transparent;
+    color: var(--text-muted);
+}
+.modal-btn.cancel:hover {
+    color: var(--text-primary);
+}
+.modal-btn.save {
+    background: var(--accent-violet);
+    color: white;
+}
+.modal-btn.save:hover {
+    background: #4338ca;
+}
+

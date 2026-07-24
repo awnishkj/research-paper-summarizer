@@ -15,7 +15,7 @@
     <!-- KaTeX for LaTeX Math Rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <!-- Custom stylesheet -->
-    <link rel="stylesheet" href="/assets/styles.css?v=23.0">
+    <link rel="stylesheet" href="/assets/styles.css?v=24.0">
 </head>
 <body>
     <!-- API Alert Banner (Hidden by default, shown if API key is missing) -->
@@ -92,6 +92,12 @@
                     <span id="api-status-badge" class="status-badge checking">
                         <span class="status-dot"></span> Checking...
                     </span>
+                </div>
+                <div class="api-key-config" style="margin-top: 10px;">
+                    <button id="configure-key-btn" class="settings-btn" title="Configure API Key">
+                        <i data-lucide="key"></i>
+                        <span>Change API Key</span>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -255,10 +261,30 @@
         </section>
     </div>
 
+    <!-- API Key Configuration Modal -->
+    <div id="key-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Configure Gemini API Key</h3>
+                <button id="close-modal-btn" class="close-modal-btn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Paste a new Google Gemini API key below. The key will be validated, saved to the local configuration, and used immediately.</p>
+                <input type="text" id="api-key-input" class="modal-input" placeholder="AQ.Ab8RN6...">
+                <div class="modal-actions">
+                    <button id="cancel-key-btn" class="modal-btn cancel">Cancel</button>
+                    <button id="save-key-btn" class="modal-btn save">Save Key</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script imports -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-    <script src="/assets/script.js?v=23.0"></script>
+    <script src="/assets/script.js?v=24.0"></script>
 </body>
 </html>
