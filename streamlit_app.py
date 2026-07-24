@@ -98,12 +98,12 @@ st.markdown("""
 
     /* Sidebar Styling to match assets/styles.css */
     section[data-testid="stSidebar"] {
-        background-color: rgba(255, 255, 255, 0.7) !important;
+        background-color: rgba(255, 255, 255, 0.75) !important;
         backdrop-filter: blur(20px) !important;
         border-right: 1px solid rgba(15, 23, 42, 0.08) !important;
     }
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 16px !important;
+        gap: 14px !important;
         padding-top: 10px !important;
     }
 
@@ -111,11 +111,11 @@ st.markdown("""
     .app-header-container {
         display: flex;
         flex-direction: column;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
     }
     .app-logo-title {
         font-family: 'Outfit', sans-serif;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 800;
         color: #0f172a;
         margin: 0;
@@ -123,10 +123,10 @@ st.markdown("""
     }
     .app-logo-subtitle {
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
-        color: #4f46e5;
-        letter-spacing: 1px;
+        color: #64748b;
+        letter-spacing: 0.8px;
         text-transform: uppercase;
         margin: 0;
     }
@@ -144,13 +144,13 @@ st.markdown("""
     /* History/Recent Document Lists */
     .sidebar-section-title {
         font-family: 'Outfit', sans-serif;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         color: #64748b;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 8px;
-        margin-top: 12px;
+        margin-bottom: 6px;
+        margin-top: 10px;
     }
     
     /* Custom style for list button cards */
@@ -177,6 +177,14 @@ st.markdown("""
         box-shadow: 0 4px 8px rgba(79, 70, 229, 0.06) !important;
     }
     
+    /* Pill button style specifically for New General Chat */
+    div.stButton > button[key*="new_general_chat"] {
+        border-radius: 20px !important;
+        text-align: center !important;
+        border: 1px solid rgba(79, 70, 229, 0.2) !important;
+        font-weight: 600 !important;
+    }
+    
     /* Suggestion chip buttons styling */
     .suggestion-chip button {
         background: rgba(15, 23, 42, 0.02) !important;
@@ -196,7 +204,7 @@ st.markdown("""
     /* Tab Switcher overrides */
     button[data-baseweb="tab"] {
         font-family: 'Outfit', sans-serif !important;
-        font-size: 14.5px !important;
+        font-size: 14px !important;
         font-weight: 600 !important;
         color: #64748b !important;
         border-bottom: 2px solid transparent !important;
@@ -275,11 +283,14 @@ def render_chat_message(role, content):
 
 # --- SIDEBAR CONTROLLERS ---
 with st.sidebar:
-    # Logo & Header Container matching Assets logo
+    # Logo Header Container matching Assets logo
     st.markdown("""
-    <div class="app-header-container">
-        <h1 class="app-logo-title">ResearchIQ</h1>
-        <p class="app-logo-subtitle">AI-Powered Research Assistant</p>
+    <div class="app-header-container" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <div style="font-size: 26px;">🧠</div>
+        <div>
+            <h1 class="app-logo-title" style="margin: 0; line-height: 1.1;">ResearchIQ</h1>
+            <p class="app-logo-subtitle" style="margin: 0;">AI-Powered Research Assistant</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     st.write("---")
@@ -301,59 +312,11 @@ with st.sidebar:
             st.rerun()
         st.write("---")
 
-    # Upload New Paper widget styled like "+" button
-    st.markdown('<div class="sidebar-section-title">Upload New Paper</div>', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"], label_visibility="collapsed")
-    if uploaded_file is not None:
-        # Check if already processed
-        existing_id = None
-        for pid, pdata in st.session_state.papers.items():
-            if pdata.get("metadata", {}).get("file_name") == uploaded_file.name:
-                existing_id = pid
-                break
-                
-        if existing_id:
-            st.session_state.active_paper_id = existing_id
-            st.session_state.mode = "paper"
-            st.success("Loaded from cache!")
-        else:
-            with st.spinner("Processing PDF and generating executive summary..."):
-                # Save uploaded file
-                temp_id = str(uuid.uuid4())
-                file_path = os.path.join(UPLOAD_DIR, f"{temp_id}.pdf")
-                with open(file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                
-                # Extract PDF text
-                extraction = pdf_reader.extract_pdf_data(file_path)
-                if extraction["success"]:
-                    # Generate TL;DR Executive summary
-                    exec_summary = summarizer.generate_summary(extraction["text"], "executive")
-                    
-                    st.session_state.papers[temp_id] = {
-                        "text": extraction["text"],
-                        "pages": extraction["pages"],
-                        "metadata": {
-                            "title": extraction["metadata"]["title"] or uploaded_file.name,
-                            "file_name": uploaded_file.name,
-                            "author": extraction["metadata"]["author"] or "Unknown Author",
-                            "subject": extraction["metadata"]["subject"] or "Academic Research",
-                            "pages_count": extraction["pages"]
-                        },
-                        "summaries": {
-                            "executive": exec_summary,
-                            "structured": None,
-                            "concepts": None
-                        },
-                        "chat_history": []
-                    }
-                    save_persistent_db()
-                    st.session_state.active_paper_id = temp_id
-                    st.session_state.mode = "paper"
-                    st.success("Successfully summarized!")
-                    st.rerun()
-                else:
-                    st.error(f"Failed to read PDF: {extraction['error']}")
+    # New General Chat button (Pill styled)
+    if st.sidebar.button("➕ New General Chat", key="new_general_chat", use_container_width=True):
+        st.session_state.mode = "general"
+        st.session_state.active_general_chat_id = None
+        st.rerun()
 
     # Recent Documents List (Staged like document cards)
     if st.session_state.papers:
@@ -371,14 +334,7 @@ with st.sidebar:
                 st.session_state.mode = "paper"
                 st.rerun()
 
-    # General Chat section
-    st.write("---")
-    st.markdown('<div class="sidebar-section-title">Assistant Copilot</div>', unsafe_allow_html=True)
-    if st.sidebar.button("💬 New General Chat", use_container_width=True):
-        st.session_state.mode = "general"
-        st.session_state.active_general_chat_id = None
-        st.rerun()
-        
+    # General Chat history section
     if st.session_state.general_chats:
         st.markdown('<div class="sidebar-section-title">Recent Chats</div>', unsafe_allow_html=True)
         for cid, cdata in list(st.session_state.general_chats.items())[:15]:
@@ -394,16 +350,132 @@ with st.sidebar:
                 st.session_state.mode = "general"
                 st.rerun()
 
+    # API Status Indicator fixed at bottom of sidebar
+    st.write("---")
+    st.markdown("""
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; padding-left: 2px;">
+        <span>Gemini API Status:</span>
+        <span style="display: inline-block; width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%;"></span>
+        <span style="font-weight: 600; color: #16a34a;">Online</span>
+    </div>
+    """, unsafe_allow_html=True)
+
 # --- MAIN DASHBOARD INTERFACE ---
-if st.session_state.mode == "paper" and st.session_state.active_paper_id:
-    # 3-Column Layout: Main area splits into Summary Panel (2/3) and chat assistant (1/3)
-    col_summary, col_chat = st.columns([2, 1])
-    
-    paper_id = st.session_state.active_paper_id
-    paper_data = st.session_state.papers[paper_id]
-    
-    # MAIN COLUMN: Tab Panels
-    with col_summary:
+col_center, col_right = st.columns([2, 1])
+
+# active states configuration
+paper_id = st.session_state.active_paper_id
+paper_data = st.session_state.papers.get(paper_id) if paper_id else None
+
+# LEFT COLUMN: Center Column (PDF Upload/Welcome or Summaries Tabs)
+with col_center:
+    if st.session_state.mode == "welcome" or not paper_data:
+        # Document Icon
+        st.markdown("""
+        <div style="display: flex; justify-content: center; margin-top: 15px; margin-bottom: 10px;">
+            <div style="background-color: #f1f5f9; border-radius: 50%; width: 56px; height: 56px; display: flex; justify-content: center; align-items: center; font-size: 26px; color: #475569; border: 1px solid rgba(15,23,42,0.06);">
+                📄
+            </div>
+        </div>
+        <p style="text-align: center; color: #475569; font-size: 14.5px; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+            Upload a PDF research paper to generate automated summaries, extract key concepts, and start chatting with the paper context.
+        </p>
+        """, unsafe_allow_html=True)
+
+        # Drag & drop PDF uploader
+        uploaded_file = st.file_uploader("Drag & drop your PDF here", type=["pdf"], key="main_pdf_uploader")
+        if uploaded_file is not None:
+            # Check if already processed
+            existing_id = None
+            for pid, pdata in st.session_state.papers.items():
+                if pdata.get("metadata", {}).get("file_name") == uploaded_file.name:
+                    existing_id = pid
+                    break
+                    
+            if existing_id:
+                st.session_state.active_paper_id = existing_id
+                st.session_state.mode = "paper"
+                st.success("Loaded from cache!")
+                st.rerun()
+            else:
+                with st.spinner("Processing PDF and generating executive summary..."):
+                    temp_id = str(uuid.uuid4())
+                    file_path = os.path.join(UPLOAD_DIR, f"{temp_id}.pdf")
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    
+                    extraction = pdf_reader.extract_pdf_data(file_path)
+                    if extraction["success"]:
+                        exec_summary = summarizer.generate_summary(extraction["text"], "executive")
+                        st.session_state.papers[temp_id] = {
+                            "text": extraction["text"],
+                            "pages": extraction["pages"],
+                            "metadata": {
+                                "title": extraction["metadata"]["title"] or uploaded_file.name,
+                                "file_name": uploaded_file.name,
+                                "author": extraction["metadata"]["author"] or "Unknown Author",
+                                "subject": extraction["metadata"]["subject"] or "Academic Research",
+                                "pages_count": extraction["pages"]
+                            },
+                            "summaries": {
+                                "executive": exec_summary,
+                                "structured": None,
+                                "concepts": None
+                            },
+                            "chat_history": []
+                        }
+                        save_persistent_db()
+                        st.session_state.active_paper_id = temp_id
+                        st.session_state.mode = "paper"
+                        st.rerun()
+                    else:
+                        st.error(f"Failed to read PDF: {extraction['error']}")
+
+        st.write("---")
+
+        # General AI Research Assistant Panel
+        st.markdown('<h4 style="font-family: \'Outfit\', sans-serif; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">💬 General AI Research Assistant</h4>', unsafe_allow_html=True)
+        
+        chat_id = st.session_state.active_general_chat_id
+        chat_data = st.session_state.general_chats.get(chat_id, {"messages": []})
+        
+        general_chat_container = st.container()
+        with general_chat_container:
+            if not chat_data["messages"]:
+                st.markdown("""
+                <div style="background-color: #f8fafc; border: 1px solid rgba(15, 23, 42, 0.05); border-radius: 12px; padding: 16px; color: #334155; font-size: 13.5px; margin-bottom: 12px; border-left: 4px solid #4f46e5;">
+                    👋 <strong>Hello!</strong> I am your general research helper. You can ask me general questions, clarify scientific terms, or outline study topics before loading a paper.
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                for msg in chat_data["messages"]:
+                    render_chat_message(msg["role"], msg["content"])
+
+        user_input = st.chat_input("Ask a general question...", key="general_chat_input")
+        if user_input:
+            if not chat_id:
+                chat_id = str(uuid.uuid4())
+                st.session_state.active_general_chat_id = chat_id
+                st.session_state.general_chats[chat_id] = {
+                    "chat_id": chat_id,
+                    "title": user_input[:28] + "..." if len(user_input) > 28 else user_input,
+                    "messages": []
+                }
+                chat_data = st.session_state.general_chats[chat_id]
+                st.session_state.mode = "general"
+                
+            chat_data["messages"].append({"role": "user", "content": user_input})
+            save_persistent_db()
+            st.rerun()
+
+        if chat_data["messages"] and chat_data["messages"][-1]["role"] == "user":
+            with st.spinner("Thinking..."):
+                response = summarizer.chat_general(chat_data["messages"])
+                chat_data["messages"].append({"role": "assistant", "content": response})
+                save_persistent_db()
+                st.rerun()
+    else:
+        # Document loaded: display Summaries Tabs
         st.markdown(f"## 📄 {paper_data['metadata']['title']}")
         st.markdown(
             f"**Author:** {paper_data['metadata']['author']} | "
@@ -411,7 +483,6 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
             f"**Subject:** {paper_data['metadata']['subject']}"
         )
         
-        # Tabs for Summaries
         tab_tldr, tab_tech, tab_concepts = st.tabs(["⚡ TL;DR / Executive", "🔬 Technical Analysis", "📚 Key Concepts Map"])
         
         with tab_tldr:
@@ -443,19 +514,20 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
             else:
                 render_content(paper_data["summaries"]["concepts"])
 
-    # RIGHT COLUMN: Grounded Chat Assistant
-    with col_chat:
-        st.markdown("### 🤖 Paper Assistant")
-        st.caption("Grounded strictly in paper context")
-        st.write("---")
-        
-        # Chat container height styling
+# RIGHT COLUMN: Paper Assistant Column (Persistent)
+with col_right:
+    st.markdown('<h3 style="font-family: \'Outfit\', sans-serif; font-weight: 700; color: #0f172a; margin-bottom: 2px;">📋 Paper Assistant</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #64748b; font-size: 12px; margin-bottom: 16px;">Grounded in paper context</p>', unsafe_allow_html=True)
+    st.write("---")
+    
+    if paper_data:
+        # Chat history container
         chat_container = st.container()
         with chat_container:
             for msg in paper_data["chat_history"]:
                 render_chat_message(msg["role"], msg["content"])
                 
-        # Interactive Suggestion Chips matching custom UI triggers
+        # Interactive Suggestion Chips
         st.markdown("###### Suggestion Queries:")
         col_chip1, col_chip2 = st.columns(2)
         with col_chip1:
@@ -483,79 +555,27 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
 
         st.write("---")
         
-        # Question input
-        user_question = st.chat_input("Ask a question about this paper...")
+        # Chat input
+        user_question = st.chat_input("Ask a question about this paper...", key="paper_chat_input")
         if user_question:
-            # Append query immediately
             paper_data["chat_history"].append({"role": "user", "content": user_question})
             save_persistent_db()
             st.rerun()
             
-    # Process message generation if last message was from user
-    if paper_data["chat_history"] and paper_data["chat_history"][-1]["role"] == "user":
-        with col_chat:
+        # Response generation
+        if paper_data["chat_history"] and paper_data["chat_history"][-1]["role"] == "user":
             with st.spinner("Thinking..."):
                 response = summarizer.chat_with_paper(paper_data["chat_history"], paper_data["text"])
                 paper_data["chat_history"].append({"role": "assistant", "content": response})
                 save_persistent_db()
                 st.rerun()
-
-elif st.session_state.mode == "general":
-    # General Assistant Mode
-    st.markdown("## 🤖 AI Research Copilot")
-    st.caption("General chat copilot. Use for academic questions, code examples, or research outlines.")
-    st.write("---")
-    
-    chat_id = st.session_state.active_general_chat_id
-    chat_data = None
-    if chat_id:
-        chat_data = st.session_state.general_chats[chat_id]
     else:
-        chat_data = {"messages": []}
+        # Welcome advisor bubble when empty
+        st.markdown("""
+        <div style="background-color: #f8fafc; border: 1px solid rgba(15, 23, 42, 0.05); border-radius: 12px; padding: 16px; color: #334155; font-size: 13.5px; margin-bottom: 20px; border-left: 4px solid #7c3aed; line-height: 1.5;">
+            👋 <strong>Hello!</strong> I am your research advisor. Upload a research paper, and I can help answer specific questions, explain complex math, locate datasets, or elaborate on their results.
+        </div>
+        """, unsafe_allow_html=True)
         
-    # Render messages
-    for msg in chat_data["messages"]:
-        render_chat_message(msg["role"], msg["content"])
-        
-    user_input = st.chat_input("Ask a research question...")
-    if user_input:
-        if not chat_id:
-            chat_id = str(uuid.uuid4())
-            st.session_state.active_general_chat_id = chat_id
-            st.session_state.general_chats[chat_id] = {
-                "chat_id": chat_id,
-                "title": user_input[:28] + "..." if len(user_input) > 28 else user_input,
-                "messages": []
-            }
-            chat_data = st.session_state.general_chats[chat_id]
-            
-        chat_data["messages"].append({"role": "user", "content": user_input})
-        save_persistent_db()
-        st.rerun()
-        
-    if chat_data["messages"] and chat_data["messages"][-1]["role"] == "user":
-        with st.spinner("Thinking..."):
-            response = summarizer.chat_general(chat_data["messages"])
-            chat_data["messages"].append({"role": "assistant", "content": response})
-            save_persistent_db()
-            st.rerun()
-
-else:
-    # Welcome / Blank State matching Assets layout
-    st.markdown("## Welcome to ResearchIQ 🧠")
-    st.markdown("Upload a scientific PDF paper in the sidebar or start a general chat thread to begin.")
-    
-    # Visual feature list card matching custom UI designs
-    st.markdown("""
-    <div class="premium-card">
-        <h4 style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #0f172a; margin-bottom: 16px;">Available Features:</h4>
-        <ul style="line-height: 2.0; font-size: 13.5px; color: #334155; padding-left: 20px;">
-            <li>⚡ <strong>Executive Summarizer</strong>: Generates instant, publication-grade TL;DR bullet points.</li>
-            <li>🔬 <strong>Deep Technical Analysis</strong>: Extracts concrete methodologies, variables, dataset parameters, and results immediately.</li>
-            <li>📚 <strong>Key Concepts Glossary</strong>: Maps out definitions for complex terminology.</li>
-            <li>📊 <strong>Auto-Render Diagrams</strong>: Compiles visual Mermaid flowcharts and system flow diagrams dynamically.</li>
-            <li>📝 <strong>Equation Formatting</strong>: Displays LaTeX formulas dynamically in high-fidelity mathematical typesetting.</li>
-            <li>🤖 <strong>Context-Grounded Q&A</strong>: Ask specific queries regarding paper details, models, or limitations.</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
+        # Disabled chat input box placeholder
+        st.chat_input("Ask a question about this paper... (Upload a paper first)", disabled=True, key="disabled_chat_input")
