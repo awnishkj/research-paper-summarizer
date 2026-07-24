@@ -185,7 +185,7 @@ with st.sidebar:
         if user_key:
             os.environ["GEMINI_API_KEY"] = user_key
             api_key = user_key
-            st.experimental_rerun()
+            st.rerun()
         st.write("---")
 
     # Document Uploader
@@ -238,7 +238,7 @@ with st.sidebar:
                     st.session_state.active_paper_id = temp_id
                     st.session_state.mode = "paper"
                     st.success("Successfully summarized!")
-                    st.experimental_rerun()
+                    st.rerun()
                 else:
                     st.error(f"Failed to read PDF: {extraction['error']}")
 
@@ -259,7 +259,7 @@ with st.sidebar:
             if st.sidebar.button(btn_label, key=f"btn-paper-{pid}"):
                 st.session_state.active_paper_id = pid
                 st.session_state.mode = "paper"
-                st.experimental_rerun()
+                st.rerun()
 
     # General Chat section
     st.write("---")
@@ -267,7 +267,7 @@ with st.sidebar:
     if st.sidebar.button("💬 New General Chat", use_container_width=True):
         st.session_state.mode = "general"
         st.session_state.active_general_chat_id = None
-        st.experimental_rerun()
+        st.rerun()
         
     if st.session_state.general_chats:
         st.markdown("#### Recent Chats")
@@ -282,7 +282,7 @@ with st.sidebar:
             if st.sidebar.button(btn_label, key=f"btn-chat-{cid}"):
                 st.session_state.active_general_chat_id = cid
                 st.session_state.mode = "general"
-                st.experimental_rerun()
+                st.rerun()
 
 # --- MAIN DASHBOARD INTERFACE ---
 if st.session_state.mode == "paper" and st.session_state.active_paper_id:
@@ -314,7 +314,7 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
                     if not summary.startswith("Error"):
                         st.session_state.papers[paper_id]["summaries"]["structured"] = summary
                         save_persistent_db()
-                        st.experimental_rerun()
+                        st.rerun()
                     else:
                         st.error(summary)
             else:
@@ -327,7 +327,7 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
                     if not summary.startswith("Error"):
                         st.session_state.papers[paper_id]["summaries"]["concepts"] = summary
                         save_persistent_db()
-                        st.experimental_rerun()
+                        st.rerun()
                     else:
                         st.error(summary)
             else:
@@ -351,7 +351,7 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
             # Append query immediately
             paper_data["chat_history"].append({"role": "user", "content": user_question})
             save_persistent_db()
-            st.experimental_rerun()
+            st.rerun()
             
     # Process message generation if last message was from user
     if paper_data["chat_history"] and paper_data["chat_history"][-1]["role"] == "user":
@@ -360,7 +360,7 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
                 response = summarizer.chat_with_paper(paper_data["chat_history"], paper_data["text"])
                 paper_data["chat_history"].append({"role": "assistant", "content": response})
                 save_persistent_db()
-                st.experimental_rerun()
+                st.rerun()
 
 elif st.session_state.mode == "general":
     # General Assistant Mode
@@ -393,14 +393,14 @@ elif st.session_state.mode == "general":
             
         chat_data["messages"].append({"role": "user", "content": user_input})
         save_persistent_db()
-        st.experimental_rerun()
+        st.rerun()
         
     if chat_data["messages"] and chat_data["messages"][-1]["role"] == "user":
         with st.spinner("Thinking..."):
             response = summarizer.chat_general(chat_data["messages"])
             chat_data["messages"].append({"role": "assistant", "content": response})
             save_persistent_db()
-            st.experimental_rerun()
+            st.rerun()
 
 else:
     # Welcome / Blank State

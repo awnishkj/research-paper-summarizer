@@ -60,3 +60,9 @@
   - `[x]` Add upload deduplication check in app.py to return existing summaries instantly when duplicate file name uploaded
 - `[x]` Dotenv Override Key Upgrades
   - `[x]` Configure override=True parameters in load_dotenv inside app.py and summarizer.py to instantly hot-reload API key swaps
+- `[x]` Streamlit Cloud Deployment Integration
+  - `[x]` Create streamlit_app.py wrapping local PDF, summarization, and chat logic for native Streamlit hosting
+  - `[x]` Add custom CSS typography, gradients, and layout styling in streamlit_app.py
+  - `[x]` Add Mermaid iframe rendering and MathJax delimiter parser in streamlit_app.py
+  - `[x]` Add streamlit dependency inside requirements.txt
+  - `[x]` Update deprecated st.experimental_rerun() calls to new st.rerun() API inside streamlit_app.py to fix AttributeError crashes
