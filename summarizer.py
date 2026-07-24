@@ -74,9 +74,9 @@ Generate a thorough, complete response matching the structure requested in the T
         response = model.generate_content(
             contents=user_message,
             generation_config={
-                "temperature": 0.2,
+                "temperature": 0.25,
                 "top_p": 0.95,
-                "max_output_tokens": 2048,
+                "max_output_tokens": 8192,
             }
         )
         
