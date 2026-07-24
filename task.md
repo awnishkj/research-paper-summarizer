@@ -54,8 +54,3 @@
 - `[x]` Backend API 429 Rate Limit Resiliency
   - `[x]` Create call_gemini_with_retry helper function with exponential backoff retries in summarizer.py
   - `[x]` Wrap all summary and chat API calls inside the backoff retry function to handle transient RPM limits
-- `[x]` Interactive Settings API Key Modal
-  - `[x]` Create settings-btn trigger inside index.html sidebar footer
-  - `[x]` Design glassmorphic key-modal settings element in index.html and styles.css
-  - `[x]` Code modal show/hide state transitions and form submission logic inside script.js
-  - `[x]` Implement dynamic POST /api/config/key updating environment memory and rewriting .env configurations in app.py
