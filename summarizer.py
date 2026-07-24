@@ -56,7 +56,20 @@ def generate_summary(paper_text: str, summary_type: str = "executive") -> str:
             
         model = get_gemini_model(system_instruction=SYSTEM_PROMPT_SUMMARIZE)
         
-        user_message = f"Here is the text extracted from the research paper:\n\n{paper_text}\n\nTask: {prompt}"
+        user_message = f"""You are analyzing a research paper.
+
+INSTRUCTIONS:
+You must perform a detailed, comprehensive analysis of the entire paper text provided below. Extract concrete details, design methodologies, data parameters, and quantitative outcomes from the main body sections (Introduction, Methodology, Design, Results, and Discussion). Do NOT rely solely on the Abstract or conclusion/conflict sections.
+
+TASK:
+{prompt}
+
+RESEARCH PAPER TEXT:
+{paper_text}
+
+REMINDER:
+Generate a thorough, complete response matching the structure requested in the TASK. Make sure you extract actual numerical values, formulas, and dataset details from the text.
+"""
         
         response = model.generate_content(
             contents=user_message,

@@ -13,9 +13,61 @@ let activeChatId = null;
 
 // Configure marked options
 marked.setOptions({
-    gfm: true,
-    breaks: true
+    breaks: true,
+    gfm: true
 });
+
+/**
+ * Renders Markdown content and executes Mermaid parser on any embedded diagrams.
+ */
+function renderMarkdownWithMermaid(targetElement, markdownText) {
+    if (!targetElement) return;
+    
+    // Parse markdown into HTML
+    const html = marked.parse(markdownText || '');
+    
+    // Parse using DOM parser to safely find and extract mermaid tags
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    const mermaidCodes = doc.querySelectorAll('code.language-mermaid');
+    const hasMermaid = mermaidCodes.length > 0;
+    
+    mermaidCodes.forEach(code => {
+        const pre = code.parentElement;
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.className = 'mermaid';
+        // Remove outer spacing and decode any HTML entities
+        mermaidDiv.textContent = code.textContent.trim();
+        
+        if (pre) {
+            pre.replaceWith(mermaidDiv);
+        }
+    });
+    
+    // Set target innerHTML
+    targetElement.innerHTML = doc.body.innerHTML;
+    
+    // Initialize mermaid if needed and run rendering
+    if (hasMermaid && typeof mermaid !== 'undefined') {
+        try {
+            // Configure mermaid theme for slate/indigo layout
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'neutral',
+                securityLevel: 'loose',
+                flowchart: { useMaxWidth: true, htmlLabels: true }
+            });
+            
+            // Render targets
+            mermaid.run({
+                nodes: targetElement.querySelectorAll('.mermaid')
+            });
+        } catch (e) {
+            console.error("Failed to run Mermaid rendering:", e);
+        }
+    }
+}
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
@@ -288,7 +340,7 @@ async function handleFileUpload(file) {
         activePaperTitle.title = data.metadata.title;
 
         // Render default summary
-        summaryContent.innerHTML = marked.parse(data.initial_summary);
+        renderMarkdownWithMermaid(summaryContent, data.initial_summary);
         
         // Setup initial Chat pane state
         resetChatWithPaper(data.metadata.title);
@@ -329,7 +381,7 @@ async function switchTab(tabName) {
     if (summariesCache[tabName] && !summariesCache[tabName].startsWith('Error during summary generation:')) {
         summaryContent.classList.remove('hidden');
         tabSkeleton.classList.add('hidden');
-        summaryContent.innerHTML = marked.parse(summariesCache[tabName]);
+        renderMarkdownWithMermaid(summaryContent, summariesCache[tabName]);
         return;
     }
     
@@ -341,7 +393,7 @@ async function switchTab(tabName) {
         const summary = await fetchSummary(activePaperId, tabName);
         summariesCache[tabName] = summary;
         
-        summaryContent.innerHTML = marked.parse(summary);
+        renderMarkdownWithMermaid(summaryContent, summary);
         summaryContent.classList.remove('hidden');
         tabSkeleton.classList.add('hidden');
     } catch (err) {
@@ -446,7 +498,7 @@ function appendChatMessage(role, content) {
     
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
-    contentDiv.innerHTML = marked.parse(content);
+    renderMarkdownWithMermaid(contentDiv, content);
     
     messageDiv.appendChild(contentDiv);
     chatMessagesContainer.appendChild(messageDiv);
@@ -492,7 +544,7 @@ function appendGeneralMessage(role, content) {
     if (role === 'system') {
         contentDiv.textContent = content;
     } else {
-        contentDiv.innerHTML = marked.parse(content);
+        renderMarkdownWithMermaid(contentDiv, content);
     }
     
     messageDiv.appendChild(contentDiv);
@@ -772,7 +824,7 @@ async function loadPaper(paperId) {
         
         // Render or switch tabs
         if (summariesCache[activeTabName]) {
-            summaryContent.innerHTML = marked.parse(summariesCache[activeTabName]);
+            renderMarkdownWithMermaid(summaryContent, summariesCache[activeTabName]);
         } else {
             await switchTab(activeTabName);
         }
