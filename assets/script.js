@@ -59,12 +59,35 @@ function renderMarkdownWithMermaid(targetElement, markdownText) {
                 flowchart: { useMaxWidth: true, htmlLabels: true }
             });
             
-            // Render targets
-            mermaid.run({
-                nodes: targetElement.querySelectorAll('.mermaid')
+            // Render targets one-by-one asynchronously to handle syntax errors gracefully
+            const nodes = targetElement.querySelectorAll('.mermaid');
+            nodes.forEach(async (node, index) => {
+                const code = node.textContent.trim();
+                const id = `mermaid-svg-${Date.now()}-${index}-${Math.floor(Math.random() * 1000)}`;
+                try {
+                    const { svg } = await mermaid.render(id, code);
+                    node.innerHTML = svg;
+                } catch (err) {
+                    console.error("Mermaid node render failed:", err);
+                    // Remove the error UI element that Mermaid creates in the DOM
+                    const badSvg = document.getElementById(id);
+                    if (badSvg) badSvg.remove();
+                    
+                    // Fallback to displaying a clean code block
+                    const pre = document.createElement('pre');
+                    pre.style.background = 'rgba(15, 23, 42, 0.03)';
+                    pre.style.border = '1px dashed var(--accent-violet)';
+                    pre.style.borderRadius = 'var(--border-radius-md)';
+                    pre.style.padding = '12px';
+                    pre.style.fontSize = '12px';
+                    pre.style.fontFamily = 'monospace';
+                    pre.style.overflowX = 'auto';
+                    pre.textContent = code;
+                    node.replaceWith(pre);
+                }
             });
         } catch (e) {
-            console.error("Failed to run Mermaid rendering:", e);
+            console.error("Failed to run Mermaid rendering initialization:", e);
         }
     }
 }

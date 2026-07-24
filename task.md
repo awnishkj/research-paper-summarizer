@@ -38,3 +38,11 @@
 - `[x]` Absolute Env Loading Fix
   - `[x]` Load `.env` using script absolute path in app.py
   - `[x]` Load `.env` using script absolute path in summarizer.py
+- `[x]` PDF Parsing Optimization & Mermaid Flowcharts
+  - `[x]` Restructure user prompt formatting in summarizer.py to avoid abstract-only bias
+  - `[x]` Integrate Mermaid.js script CDN into index.html
+  - `[x]` Create renderMarkdownWithMermaid parsing helper in script.js
+  - `[x]` Inject Mermaid layout guidelines into prompts.py for Structured Analysis and Key Concepts
+  - `[x]` Append custom styled CSS wrapper rules for .mermaid graphs in styles.css
+  - `[x]` Add self-healing async rendering and error fallbacks inside script.js
+  - `[x]` Commands model to wrap labels in quotes to avoid syntax errors inside prompts.py

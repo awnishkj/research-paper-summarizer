@@ -29,10 +29,11 @@ Your output must be formatted in clean Markdown. Address the following key areas
 
 ### 2. Methodology & System Design
 - Describe the core methodology, mathematical formulations, frameworks, or experimental setups.
-- **Architecture Visualization**: You MUST include a Mermaid flowchart (`graph TD` or `graph LR`) visualizing the system architecture, data processing pipeline, or methodology steps. Format it inside a clean mermaid code block:
+- **Architecture Visualization**: You MUST include a Mermaid flowchart (`graph TD` or `graph LR`) visualizing the system architecture, data processing pipeline, or methodology steps.
+  *Mermaid syntax rule*: Always wrap node labels in double quotes to avoid syntax errors with brackets or parentheses (e.g., use A["Step Name (Detail)"] instead of A[Step Name (Detail)]). Format it inside a clean mermaid code block:
   ```mermaid
   graph TD
-      A[Input Data] --> B[Processing Step]
+      A["Input Data"] --> B["Processing Step"]
   ```
 - What datasets were used? If applicable, describe training sizes, parameters, architectures, and hyperparameters.
 - Explain the logic behind the experimental design.
@@ -53,10 +54,11 @@ KEY_CONCEPTS_PROMPT = """Extract and define the **Core Concepts, Models, and Ter
 Your output must be formatted in clean Markdown.
 
 ### 🧠 Concepts Map Diagram
-Include a Mermaid flowchart or mindmap at the top of this section mapping the connections and relationships between the core concepts extracted. Format it inside a clean mermaid code block:
+Include a Mermaid flowchart or mindmap at the top of this section mapping the connections and relationships between the core concepts extracted.
+*Mermaid syntax rule*: Always wrap node labels in double quotes to avoid syntax errors with brackets or parentheses (e.g., use ConceptA["Concept A (Detail)"] instead of ConceptA[Concept A (Detail)]). Format it inside a clean mermaid code block:
 ```mermaid
 graph LR
-    ConceptA --> ConceptB
+    ConceptA["Concept A"] --> ConceptB["Concept B"]
 ```
 
 Separate concepts with horizontal rules (`---`) for visual clarity. For each concept (extract between 5 to 10 key terms):
