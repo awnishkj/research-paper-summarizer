@@ -39,6 +39,17 @@ if "active_general_chat_id" not in st.session_state:
     st.session_state.active_general_chat_id = None
 if "mode" not in st.session_state:
     st.session_state.mode = "welcome"  # 'welcome', 'paper', 'general'
+if "gemini_api_key" not in st.session_state:
+    st.session_state.gemini_api_key = os.getenv("GEMINI_API_KEY")
+    if not st.session_state.gemini_api_key:
+        try:
+            st.session_state.gemini_api_key = st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            pass
+
+# Keep environment variable in sync
+if st.session_state.gemini_api_key:
+    os.environ["GEMINI_API_KEY"] = st.session_state.gemini_api_key
 
 # Helper: Load local database
 def load_persistent_db():
@@ -65,20 +76,7 @@ def save_persistent_db():
 # Load DB on startup
 load_persistent_db()
 
-# Configure API Key from Secrets, Env, or Session State
-if "gemini_api_key" not in st.session_state:
-    st.session_state.gemini_api_key = os.getenv("GEMINI_API_KEY")
-    if not st.session_state.gemini_api_key:
-        try:
-            st.session_state.gemini_api_key = st.secrets["GEMINI_API_KEY"]
-        except Exception:
-            pass
-
-# Keep environment variable in sync
-if st.session_state.gemini_api_key:
-    os.environ["GEMINI_API_KEY"] = st.session_state.gemini_api_key
-
-# Custom styling for premium aesthetic
+# Custom CSS to skin Streamlit elements to match the exact custom FastAPI Web App frontend
 st.markdown("""
 <style>
     /* Premium font imports */
@@ -98,39 +96,104 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
 
-    /* Sidebar Styling */
+    /* Sidebar Styling to match assets/styles.css */
     section[data-testid="stSidebar"] {
-        background-color: rgba(255, 255, 255, 0.75) !important;
+        background-color: rgba(255, 255, 255, 0.7) !important;
         backdrop-filter: blur(20px) !important;
         border-right: 1px solid rgba(15, 23, 42, 0.08) !important;
     }
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+        gap: 16px !important;
+        padding-top: 10px !important;
+    }
 
-    /* Gradient header styling */
-    .app-header {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    /* Logo Header Styling */
+    .app-header-container {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 8px;
+    }
+    .app-logo-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 22px;
         font-weight: 800;
-        margin-bottom: 2px;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    .app-logo-subtitle {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        color: #4f46e5;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    /* Premium card containers */
+    .premium-card {
+        background: white !important;
+        border: 1px solid rgba(15, 23, 42, 0.06) !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02) !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* History/Recent Document Lists */
+    .sidebar-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        margin-top: 12px;
     }
     
-    .app-subtitle {
-        color: #64748b;
-        font-size: 14px;
-        margin-bottom: 24px;
+    /* Custom style for list button cards */
+    div.stButton > button {
+        background: white !important;
+        color: #334155 !important;
+        border: 1px solid rgba(15, 23, 42, 0.06) !important;
+        border-radius: 10px !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 8px 12px !important;
+        text-align: left !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01) !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    div.stButton > button:hover {
+        border-color: #4f46e5 !important;
+        color: #4f46e5 !important;
+        background: rgba(79, 70, 229, 0.03) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(79, 70, 229, 0.06) !important;
+    }
+    
+    /* Suggestion chip buttons styling */
+    .suggestion-chip button {
+        background: rgba(15, 23, 42, 0.02) !important;
+        border: 1px solid rgba(15, 23, 42, 0.05) !important;
+        border-radius: 8px !important;
+        font-size: 12px !important;
+        color: #475569 !important;
+        padding: 6px 12px !important;
+        margin: 4px 0 !important;
+    }
+    .suggestion-chip button:hover {
+        background: rgba(79, 70, 229, 0.05) !important;
+        color: #4f46e5 !important;
+        border-color: rgba(79, 70, 229, 0.2) !important;
     }
 
-    /* Card design system */
-    .premium-card {
-        background: white;
-        border: 1px solid rgba(15, 23, 42, 0.06);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02);
-        margin-bottom: 20px;
-    }
-
-    /* Tab Layout override */
+    /* Tab Switcher overrides */
     button[data-baseweb="tab"] {
         font-family: 'Outfit', sans-serif !important;
         font-size: 14.5px !important;
@@ -145,34 +208,20 @@ st.markdown("""
         border-bottom-color: #4f46e5 !important;
     }
 
-    /* Buttons override */
-    .stButton>button {
-        background: white !important;
-        color: #475569 !important;
-        border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    /* Chat bubble bubble custom skin styling */
+    div[data-testid="stChatMessage"] {
+        background-color: white !important;
+        border: 1px solid rgba(15, 23, 42, 0.05) !important;
         border-radius: 12px !important;
-        font-family: 'Outfit', sans-serif !important;
-        font-size: 13.5px !important;
-        font-weight: 600 !important;
-        padding: 8px 16px !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01) !important;
-        transition: all 0.2s ease !important;
-        width: 100% !important;
-        display: block !important;
+        padding: 12px !important;
+        margin-bottom: 12px !important;
     }
-    .stButton>button:hover {
-        border-color: #4f46e5 !important;
-        color: #4f46e5 !important;
-        background: rgba(79, 70, 229, 0.04) !important;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08) !important;
-    }
-
-    /* Thinking process card styling */
-    .thinking-summary {
-        background: rgba(15, 23, 42, 0.02) !important;
-        border-left: 3px solid #7c3aed !important;
-        border-radius: 6px !important;
-        font-family: monospace;
+    
+    /* Input field styling */
+    div[data-testid="stChatInput"] textarea {
+        border-radius: 12px !important;
+        border: 1px solid rgba(15, 23, 42, 0.08) !important;
+        padding: 12px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -226,8 +275,13 @@ def render_chat_message(role, content):
 
 # --- SIDEBAR CONTROLLERS ---
 with st.sidebar:
-    st.markdown('<h1 class="app-header">🧠 ResearchIQ</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="app-subtitle">AI-POWERED ACADEMIC COPILOT</p>', unsafe_allow_html=True)
+    # Logo & Header Container matching Assets logo
+    st.markdown("""
+    <div class="app-header-container">
+        <h1 class="app-logo-title">ResearchIQ</h1>
+        <p class="app-logo-subtitle">AI-Powered Research Assistant</p>
+    </div>
+    """, unsafe_allow_html=True)
     st.write("---")
 
     # API Key configuration
@@ -240,7 +294,6 @@ with st.sidebar:
             st.rerun()
         st.write("---")
     else:
-        # Show key status inside sidebar
         st.success("🔑 API Key configured!")
         if st.button("Change API Key"):
             st.session_state.gemini_api_key = None
@@ -248,8 +301,8 @@ with st.sidebar:
             st.rerun()
         st.write("---")
 
-    # Document Uploader
-    st.markdown("### 📄 Upload New Paper")
+    # Upload New Paper widget styled like "+" button
+    st.markdown('<div class="sidebar-section-title">Upload New Paper</div>', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"], label_visibility="collapsed")
     if uploaded_file is not None:
         # Check if already processed
@@ -262,7 +315,7 @@ with st.sidebar:
         if existing_id:
             st.session_state.active_paper_id = existing_id
             st.session_state.mode = "paper"
-            st.success("Loaded from persistent cache!")
+            st.success("Loaded from cache!")
         else:
             with st.spinner("Processing PDF and generating executive summary..."):
                 # Save uploaded file
@@ -302,16 +355,13 @@ with st.sidebar:
                 else:
                     st.error(f"Failed to read PDF: {extraction['error']}")
 
-    st.write("---")
-
-    # Recent Documents List
+    # Recent Documents List (Staged like document cards)
     if st.session_state.papers:
-        st.markdown("### 📁 Recent Documents")
+        st.markdown('<div class="sidebar-section-title">Recent Documents</div>', unsafe_allow_html=True)
         for pid, pdata in list(st.session_state.papers.items())[:15]:
             title = pdata["metadata"]["title"]
             if len(title) > 28:
                 title = title[:25] + "..."
-            # Highlight active document button
             btn_label = f"📄 {title}"
             if st.session_state.active_paper_id == pid and st.session_state.mode == "paper":
                 btn_label = f"🎯 {title}"
@@ -323,14 +373,14 @@ with st.sidebar:
 
     # General Chat section
     st.write("---")
-    st.markdown("### 🤖 Assistant Copilot")
+    st.markdown('<div class="sidebar-section-title">Assistant Copilot</div>', unsafe_allow_html=True)
     if st.sidebar.button("💬 New General Chat", use_container_width=True):
         st.session_state.mode = "general"
         st.session_state.active_general_chat_id = None
         st.rerun()
         
     if st.session_state.general_chats:
-        st.markdown("#### Recent Chats")
+        st.markdown('<div class="sidebar-section-title">Recent Chats</div>', unsafe_allow_html=True)
         for cid, cdata in list(st.session_state.general_chats.items())[:15]:
             title = cdata["title"]
             if len(title) > 28:
@@ -346,7 +396,7 @@ with st.sidebar:
 
 # --- MAIN DASHBOARD INTERFACE ---
 if st.session_state.mode == "paper" and st.session_state.active_paper_id:
-    # 3-Column Layout: Column 1 is sidebar (defined above), main splits into Summary Panel (2/3) and chat assistant (1/3)
+    # 3-Column Layout: Main area splits into Summary Panel (2/3) and chat assistant (1/3)
     col_summary, col_chat = st.columns([2, 1])
     
     paper_id = st.session_state.active_paper_id
@@ -396,7 +446,7 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
     # RIGHT COLUMN: Grounded Chat Assistant
     with col_chat:
         st.markdown("### 🤖 Paper Assistant")
-        st.caption("Answers are grounded strictly in the paper context")
+        st.caption("Grounded strictly in paper context")
         st.write("---")
         
         # Chat container height styling
@@ -405,6 +455,34 @@ if st.session_state.mode == "paper" and st.session_state.active_paper_id:
             for msg in paper_data["chat_history"]:
                 render_chat_message(msg["role"], msg["content"])
                 
+        # Interactive Suggestion Chips matching custom UI triggers
+        st.markdown("###### Suggestion Queries:")
+        col_chip1, col_chip2 = st.columns(2)
+        with col_chip1:
+            st.markdown('<div class="suggestion-chip">', unsafe_allow_html=True)
+            if st.button("💡 Explain core problem", key="chip_prob"):
+                paper_data["chat_history"].append({"role": "user", "content": "Explain the core problem of this paper in simple terms."})
+                save_persistent_db()
+                st.rerun()
+            if st.button("📊 Datasets & parameters", key="chip_data"):
+                paper_data["chat_history"].append({"role": "user", "content": "What are the datasets, configurations, and parameters used in this paper?"})
+                save_persistent_db()
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+        with col_chip2:
+            st.markdown('<div class="suggestion-chip">', unsafe_allow_html=True)
+            if st.button("⚙️ Simple Methodology", key="chip_method"):
+                paper_data["chat_history"].append({"role": "user", "content": "Explain the methodology of this paper in simple terms."})
+                save_persistent_db()
+                st.rerun()
+            if st.button("⚠️ Critical limitations", key="chip_limit"):
+                paper_data["chat_history"].append({"role": "user", "content": "What are the critical limitations or assumptions of this paper?"})
+                save_persistent_db()
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.write("---")
+        
         # Question input
         user_question = st.chat_input("Ask a question about this paper...")
         if user_question:
@@ -463,21 +541,21 @@ elif st.session_state.mode == "general":
             st.rerun()
 
 else:
-    # Welcome / Blank State
+    # Welcome / Blank State matching Assets layout
     st.markdown("## Welcome to ResearchIQ 🧠")
     st.markdown("Upload a scientific PDF paper in the sidebar or start a general chat thread to begin.")
     
-    # Visual feature list card
+    # Visual feature list card matching custom UI designs
     st.markdown("""
     <div class="premium-card">
-        <h4>Available Features:</h4>
-        <ul>
-            <li>⚡ <strong>Executive Summarizer</strong>: Get instant TL;DR bullet points.</li>
-            <li>🔬 <strong>Deep Technical Analysis</strong>: Grasp methodology, datasets, parameters, and results immediately.</li>
-            <li>📚 <strong>Key Concepts Glossary</strong>: Explore definitions mapping out complex terminology.</li>
-            <li>📊 <strong>Auto-Render Diagrams</strong>: Compiles visual Mermaid flowcharts and system workflows.</li>
-            <li>📝 <strong>Equation Formatting</strong>: Displays LaTeX formulas dynamically in publication-grade typesetting.</li>
-            <li>🤖 <strong>Context-Grounded Q&A</strong>: Ask details regarding formulas or datasets directly.</li>
+        <h4 style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #0f172a; margin-bottom: 16px;">Available Features:</h4>
+        <ul style="line-height: 2.0; font-size: 13.5px; color: #334155; padding-left: 20px;">
+            <li>⚡ <strong>Executive Summarizer</strong>: Generates instant, publication-grade TL;DR bullet points.</li>
+            <li>🔬 <strong>Deep Technical Analysis</strong>: Extracts concrete methodologies, variables, dataset parameters, and results immediately.</li>
+            <li>📚 <strong>Key Concepts Glossary</strong>: Maps out definitions for complex terminology.</li>
+            <li>📊 <strong>Auto-Render Diagrams</strong>: Compiles visual Mermaid flowcharts and system flow diagrams dynamically.</li>
+            <li>📝 <strong>Equation Formatting</strong>: Displays LaTeX formulas dynamically in high-fidelity mathematical typesetting.</li>
+            <li>🤖 <strong>Context-Grounded Q&A</strong>: Ask specific queries regarding paper details, models, or limitations.</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
