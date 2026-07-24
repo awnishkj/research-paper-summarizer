@@ -425,7 +425,7 @@ with col_center:
                                     "file_name": uploaded_file.name,
                                     "author": extraction["metadata"]["author"] or "Unknown Author",
                                     "subject": extraction["metadata"]["subject"] or "Academic Research",
-                                    "pages_count": extraction["pages"]
+                                    "pages_count": extraction["metadata"]["pages_count"]
                                 },
                                 "summaries": {
                                     "executive": exec_summary,
